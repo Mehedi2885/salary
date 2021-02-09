@@ -1,0 +1,26 @@
+version: '3'
+volumes:
+  mysqldata_job_salary:
+    driver: local
+services:
+  db:
+    image: mysql:5.7.33
+    ports:
+      - '3309:3306'
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: hassan2885
+      MYSQL_DATABASE: salary
+      MYSQL_USER: mehedi
+      MYSQL_PASSWORD: hassan2885
+    volumes:
+      - mysqldata_job_salary:/var/lib/mysql
+  web:
+    build: .
+    command: bash -c "python data_ingestion/ingestion.py && cd app && python manage.py migrate && python manage.py migrate --fake && python manage.py migrate --fake-initial && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
